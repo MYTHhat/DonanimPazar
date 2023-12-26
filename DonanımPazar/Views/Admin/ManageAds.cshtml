@@ -1,0 +1,72 @@
+﻿@using PagedList.Mvc
+
+@model PagedList.IPagedList<DonanımPazar.Models.tbl_product>
+@{
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<div class="container">
+    <div class="border-box">
+        <h2>Manage Ads</h2>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ad in Model)
+                {
+                    <tr>
+                        <td>@ad.pro_name</td>
+                        <td>@ad.pro_des</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteAd('@ad.pro_name')">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+        @{
+            var options = new PagedListRenderOptions
+            {
+                Display = PagedListDisplayMode.IfNeeded,
+                DisplayPageCountAndCurrentLocation = true,
+                MaximumPageNumbersToDisplay = 5
+            };
+            var url = Url.Action("ManageAds", new { page = Model.PageNumber });
+        }
+
+        @Html.PagedListPager(Model, page => url, options)
+    </div>
+</div>
+
+<script>
+    function deleteAd(adId) {
+        var confirmDelete = confirm("Are you sure you want to delete this ad?");
+        if (confirmDelete) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteAd")",
+                data: { id: adId },
+                success: function (result) {
+                    if (result.success) {
+                        alert("Ad deleted successfully");
+                        location.reload();
+                    } else {
+                        alert("Error deleting ad: " + result.message);
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while processing your request.");
+                }
+            });
+        }
+    }
+</script>
